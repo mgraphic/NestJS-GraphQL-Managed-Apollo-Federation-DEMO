@@ -1,0 +1,40 @@
+{
+    "name": "nestjs-graphql-apollo-federation-demo",
+    "version": "1.0.0",
+    "description": "POC for testing the integration of a managed federation gateway with Apollo Studio",
+    "main": "index.js",
+    "scripts": {
+        "start": "npm run server",
+        "dotenv-run-script": "npx dotenv-run-script .env",
+        "server": "concurrently -k -c magenta,cyan,green -n rest,orders,products,gateway \"npm:server:rest\" \"npm:server:products\" \"npm:server:orders\" \"npm:server:gateway\"",
+        "server:rest": "json-server --watch db.json",
+        "server:orders": "nest start --config ./nest-graphql-orders/nest-cli.json --path ./nest-graphql-orders/tsconfig.json --watch --watchAssets",
+        "server:products": "nest start --config ./nest-graphql-products/nest-cli.json --path ./nest-graphql-products/tsconfig.json --watch --watchAssets",
+        "server:gateway": "nodemon -r dotenv/config index.js",
+        "publish": "npm run dotenv-run-script publish-subgraphs",
+        "publish-subgraphs": "concurrently -k npm:publish:*",
+        "publish:products": "rover subgraph introspect $GRAPHQL_SUBGRAPH_ENDPOINT_PRODUCTS | rover subgraph publish --name=products --routing-url=$GRAPHQL_SUBGRAPH_ENDPOINT_PRODUCTS --convert --schema=- $APOLLO_GRAPH_ID@$APOLLO_GRAPH_VARIANT",
+        "publish:orders": "rover subgraph introspect $GRAPHQL_SUBGRAPH_ENDPOINT_ORDERS | rover subgraph publish --name=orders --routing-url=$GRAPHQL_SUBGRAPH_ENDPOINT_ORDERS --convert --schema=- $APOLLO_GRAPH_ID@$APOLLO_GRAPH_VARIANT",
+        "restore": "copyfiles -u 1 \"db-archive/db.json\" \"./\""
+    },
+    "author": "mgraphic",
+    "license": "ISC",
+    "dependencies": {
+        "@apollo/gateway": "^0.33.0",
+        "apollo-server": "^3.0.0",
+        "apollo-server-core": "^3.0.0",
+        "concurrently": "^6.2.0",
+        "copyfiles": "^2.4.1",
+        "dotenv": "^10.0.0",
+        "graphql": "^15.5.1",
+        "json-server": "^0.16.3",
+        "nodemon": "^2.0.12"
+    },
+    "devDependencies": {
+        "@apollo/rover": "^0.1.8",
+        "@nestjs/cli": "^8.0.2",
+        "dotenv-run-script": "^0.1.0",
+        "node": "^16.5.0",
+        "npx": "^10.2.2"
+    }
+}

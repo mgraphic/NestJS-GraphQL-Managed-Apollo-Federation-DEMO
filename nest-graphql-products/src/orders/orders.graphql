@@ -1,0 +1,7 @@
+extend type Order @key(fields: "id") {
+  id: ID! @external
+}
+
+extend type OrderItem @key(fields: "productId") {
+  productId: String @external
+}

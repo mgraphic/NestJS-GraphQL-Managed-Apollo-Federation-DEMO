@@ -1,0 +1,10 @@
+extend type Query {
+  customers: [Customer]
+  customer(id: ID!): Customer
+}
+
+type Customer @key(fields: "id") {
+  id: ID!
+  name: String
+  email: String
+}

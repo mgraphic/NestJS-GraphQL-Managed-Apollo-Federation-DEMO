@@ -1,0 +1,32 @@
+extend type Query {
+  products: [Product]
+  product(id: ID!): Product
+}
+
+type Product @key(fields: "id") {
+  id: ID!
+  collection: String
+  collectionId: Int
+  collectionEntity: Collection
+  model: String
+  designDescription: String
+  color: String
+  primaryColor: String
+  colorFamily: String
+  construction: String
+  material: String
+  backing: String
+  origin: String
+  fullDescription: String
+  style: String
+  pileHeight: String
+  materialSearch: String
+  careDescription: String
+  attributes: [ProductAttribute]
+}
+
+type ProductAttribute {
+  size: String
+  length: Float
+  width: Float
+}

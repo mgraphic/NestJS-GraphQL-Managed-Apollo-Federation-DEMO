@@ -1,0 +1,18 @@
+extend type Query {
+  orders: [Order]
+  order(id: ID!): Order
+}
+
+type Order @key(fields: "id") {
+  id: ID!
+  customerId: String
+  customerEntity: Customer
+  items: [OrderItem]
+}
+
+type OrderItem @key(fields: "productId") {
+  productId: String
+  quantity: Int
+  size: String
+  productEntity: Product
+}
