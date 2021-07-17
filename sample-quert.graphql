@@ -1,0 +1,46 @@
+# Write your query or mutation here
+{
+    order(id: "2") {
+        id
+        customerId
+        customerEntity {
+            id
+            name
+            email
+        }
+        items {
+            productId
+            quantity
+            size
+            productEntity {
+                id
+                collection
+                collectionId
+                collectionEntity {
+                    id
+                    name
+                    description
+                }
+                model
+                designDescription
+                color
+                primaryColor
+                colorFamily
+                construction
+                material
+                backing
+                origin
+                fullDescription
+                style
+                pileHeight
+                materialSearch
+                careDescription
+                attributes {
+                    size
+                    length
+                    width
+                }
+            }
+        }
+    }
+}
