@@ -6,7 +6,7 @@ extend type Query {
 type Product @key(fields: "id") {
   id: ID!
   collection: String
-  collectionId: Int
+  collectionId: String
   collectionEntity: Collection
   model: String
   designDescription: String

@@ -27,10 +27,6 @@ export class OrderItem {
     productEntity?: Nullable<Product>;
 }
 
-export class Collection {
-    id: string;
-}
-
 export class Product {
     id: string;
 }

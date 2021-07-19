@@ -16,7 +16,7 @@ export class Collection {
 export class Product {
     id: string;
     collection?: Nullable<string>;
-    collectionId?: Nullable<number>;
+    collectionId?: Nullable<string>;
     collectionEntity?: Nullable<Collection>;
     model?: Nullable<string>;
     designDescription?: Nullable<string>;
@@ -39,18 +39,6 @@ export class ProductAttribute {
     size?: Nullable<string>;
     length?: Nullable<number>;
     width?: Nullable<number>;
-}
-
-export class Customer {
-    id: string;
-}
-
-export class Order {
-    id: string;
-}
-
-export class OrderItem {
-    productId?: Nullable<string>;
 }
 
 export abstract class IQuery {

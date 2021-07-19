@@ -32,8 +32,8 @@ export class ProductsResolver {
   }
 
   @ResolveField('collectionEntity')
-  getCollection(@Parent() product: Product) {
-    return { __typename: 'Collection', id: product.collectionId };
+  collectionEntity(@Parent() product: Product) {
+    return this.collectionsService.getCollectionById(product.collectionId);
   }
 
   @ResolveReference()

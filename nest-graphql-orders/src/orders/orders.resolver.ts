@@ -26,14 +26,14 @@ export class OrdersResolver {
 
   @ResolveField('customerEntity')
   getCustomer(@Parent() order: Order) {
-    return { __typename: 'Customer', id: order.customerId };
+    return this.customersService.getCustomerById(order.customerId);
   }
 }
 
 @Resolver('OrderItem')
 export class OrderItemResolver {
   @ResolveField('productEntity')
-  getUser(@Parent() item: OrderItem) {
+  getProduct(@Parent() item: OrderItem) {
     return { __typename: 'Product', id: item.productId };
   }
 }

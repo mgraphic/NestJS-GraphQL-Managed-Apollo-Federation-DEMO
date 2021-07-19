@@ -19,9 +19,4 @@ export class CollectionsResolver {
   public collection(@Args('id') id: string): Observable<Collection> {
     return this.collectionsService.getCollectionById(id);
   }
-
-  @ResolveReference()
-  resolveReference(reference: { __typename: string; id: string }) {
-    return this.collectionsService.getCollectionById(reference.id);
-  }
 }
