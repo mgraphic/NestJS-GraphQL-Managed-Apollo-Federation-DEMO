@@ -12,7 +12,7 @@ This code requires an account with Apollo Studio (https://studio.apollographql.c
 
 2. Clone this repository to your local dev environment
 
-3. Rename the `.env.example` file to `.env` and replace the `<apollo-server-key>` and `<apollo-graph-name>` values:
+3. Rename the `.env.example` file to `.env` and replace the `<apollo-server-key>`, `<apollo-graph-name>`, and `<apollo-graph-variant-name>` values:
 
 ```
 APOLLO_KEY=<apollo-server-key>
