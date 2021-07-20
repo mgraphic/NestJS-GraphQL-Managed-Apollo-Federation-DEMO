@@ -58,4 +58,33 @@ npm run restore
 
 ---
 
+## Proxy Caching (optional)
+
+You can optionally run a proxy service via Docker to provide caching of the super-graph that is fed to the gateway server. The cached responses are used when the studio API is unavailable.
+
+### How it works:
+
+1. Change the value of `APOLLO_SCHEMA_CONFIG_DELIVERY_ENDPOINT` in the `.env` file to point to the proxy service:
+
+```
+APOLLO_SCHEMA_CONFIG_DELIVERY_ENDPOINT=http://localhost:8080/
+```
+
+2. Start the cluster: `docker compose up --build`.
+
+3. Watch the logs to see the gateway load: `Schema loaded and ready for execution`.
+
+4. Bring down the api:
+
+    1. Uncomment `return 500 "<b>Down!</b>";` in nginx/apibreaker.conf
+    2. Restart nginx: `docker exec -d nestjs-graphql-apollo-federation-demo_apibreaker_1 /etc/init.d/nginx reload`
+
+5. Observe that requests to `nestjs-graphql-apollo-federation-demo_apibreaker_1` have a status code of 500.
+
+6. Restart the gateway with `touch index.js`. Observe that it restarts without issue.
+
+---
+
 Setting up managed federation: https://www.apollographql.com/docs/federation/managed-federation/setup/
+
+NGINX Proxy Caching: https://github.com/apollosolutions/managed-federation-resiliency/tree/main/nginx

@@ -1,0 +1,17 @@
+services:
+    proxy:
+        image: nginx:latest
+        volumes:
+            - ./nginx/proxy.conf:/etc/nginx/nginx.conf
+            - ./tmp/:/data/nginx/cache
+        ports:
+            - '8080:80'
+        depends_on:
+            - apibreaker
+
+    apibreaker:
+        image: nginx:latest
+        volumes:
+            - ./nginx/apibreaker.conf:/etc/nginx/nginx.conf
+        ports:
+            - '8090:80'
