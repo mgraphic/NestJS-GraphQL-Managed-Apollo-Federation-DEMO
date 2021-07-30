@@ -2,6 +2,7 @@ const { ApolloServer } = require('apollo-server');
 const { ApolloGateway } = require('@apollo/gateway');
 const {
     ApolloServerPluginLandingPageGraphQLPlayground,
+    ApolloServerPluginCacheControl,
 } = require('apollo-server-core');
 
 const port = 4000;
@@ -16,7 +17,12 @@ const server = new ApolloServer({
         ApolloServerPluginLandingPageGraphQLPlayground({
             // options
         }),
+        // The max age is calculated in seconds
+        ApolloServerPluginCacheControl({ defaultMaxAge: 30 }),
     ],
+    persistedQueries: {
+        ttl: 900, // 15 minutes
+    },
 });
 
 server

@@ -15,7 +15,9 @@
         "publish-subgraphs": "concurrently -k npm:publish:*",
         "publish:products": "rover subgraph introspect $GRAPHQL_SUBGRAPH_ENDPOINT_PRODUCTS | rover subgraph publish --name=products --routing-url=$GRAPHQL_SUBGRAPH_ENDPOINT_PRODUCTS --convert --schema=- $APOLLO_GRAPH_ID@$APOLLO_GRAPH_VARIANT",
         "publish:orders": "rover subgraph introspect $GRAPHQL_SUBGRAPH_ENDPOINT_ORDERS | rover subgraph publish --name=orders --routing-url=$GRAPHQL_SUBGRAPH_ENDPOINT_ORDERS --convert --schema=- $APOLLO_GRAPH_ID@$APOLLO_GRAPH_VARIANT",
-        "restore": "copyfiles -u 1 \"db-archive/db.json\" \"./\""
+        "restore": "copyfiles -u 1 \"db-archive/db.json\" \"./\"",
+        "proxy": "docker compose -f docker-compose.proxy.yaml up --build",
+        "webhook": "docker compose -f docker-compose.webhook.yaml up --build"
     },
     "author": "mgraphic",
     "license": "ISC",

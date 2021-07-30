@@ -12,21 +12,18 @@ This code requires an account with Apollo Studio (https://studio.apollographql.c
 
 2. Clone this repository to your local dev environment
 
-3. Rename the `.env.example` file to `.env` and replace the `<apollo-server-key>`, `<apollo-graph-name>`, and `<apollo-graph-variant-name>` values:
+3. Rename the **_.env.example_** file to **_.env_** and replace the _`<apollo-graph-key>`_,
+   _`<apollo-graph-name>`_, and _`<apollo-graph-variant-name>`_ values:
 
-```
-APOLLO_KEY=<apollo-server-key>
+```sh
+APOLLO_KEY=<apollo-graph-key>
 APOLLO_GRAPH_ID=<apollo-graph-name>
 APOLLO_GRAPH_VARIANT=<apollo-graph-variant-name>
-APOLLO_SCHEMA_CONFIG_DELIVERY_ENDPOINT=https://uplink.api.apollographql.com/
-
-GRAPHQL_SUBGRAPH_ENDPOINT_ORDERS=http://localhost:4001/graphql
-GRAPHQL_SUBGRAPH_ENDPOINT_PRODUCTS=http://localhost:4002/graphql
 ```
 
 4. Install NPM packages in the root app and both GraphQL server instances:
 
-```
+```sh
 npm install
 cd nest-graphql-orders
 npm install
@@ -40,51 +37,144 @@ npm install
 
 2. Start servers:
 
-```
+```sh
 npm start
 ```
 
 3. In a new terminal window, run the publisher after the server instances are fully running:
 
-```
+```sh
 npm run publish
 ```
 
-4. Optionally you can restore the db.json back to the original state (requires restarting of the services):
+4. Optionally you can restore the db.json back to the original state (requires restarting of
+   the services):
 
-```
+```sh
 npm run restore
 ```
 
 ---
 
-## Proxy Caching (optional)
+# Managed Federation Resiliency (Optional)
 
-You can optionally run a proxy service via Docker to provide caching of the super-graph that is fed to the gateway server. The cached responses are used when the studio API is unavailable.
+This section contains explorations for adding resiliency to an Apollo Gateway server using managed
+federation.
 
-### How it works:
+## Approach #1: Nginx Caching Proxy
 
-1. Change the value of `APOLLO_SCHEMA_CONFIG_DELIVERY_ENDPOINT` in the `.env` file to point to the proxy service:
+Configure your gateway to request schema updates from an Nginx instance that proxies to Apollo Studio.
+The instance can be configured to return stale data if Apollo Studio is unreachable.
 
+### Setup:
+
+1. Start Docker Services
+
+```sh
+npm run proxy
 ```
+
+2. Modify **_.env_** envrionment settings to use the caching method approach #1
+
+```sh
+# # use this value when you ARE NOT using any the optional caching methods
+# APOLLO_SCHEMA_CONFIG_DELIVERY_ENDPOINT=https://uplink.api.apollographql.com/
+
+
+# # use this value ONLY when you ARE using the optional caching method approach #1 (Approach #1: Nginx Caching Proxy)
 APOLLO_SCHEMA_CONFIG_DELIVERY_ENDPOINT=http://localhost:8080/
+
+
+# # use these values ONLY when you ARE using the optional caching method approach #2  (Approach #2: Build Status Webhook)
+# APOLLO_SCHEMA_CONFIG_DELIVERY_ENDPOINT=http://localhost:8090/
+# SDL_BACKUP_ENDPOINT=http://localhost:5000/backup-sdl
 ```
 
-2. Start the cluster: `docker compose up --build`.
+3. Restart GraphQL instances
 
-3. Watch the logs to see the gateway load: `Schema loaded and ready for execution`.
+4. Publish the subgraphs
 
-4. Bring down the api:
+```sh
+npm run publish
+```
 
-    1. Uncomment `return 500 "<b>Down!</b>";` in nginx/apibreaker.conf
-    2. Restart nginx: `docker exec -d nestjs-graphql-apollo-federation-demo_apibreaker_1 /etc/init.d/nginx reload`
+### Testing:
 
-5. Observe that requests to `nestjs-graphql-apollo-federation-demo_apibreaker_1` have a status code of 500.
+1. Bring down the api:
 
-6. Restart the gateway with `touch index.js`. Observe that it restarts without issue.
+    1. Uncomment _`return 500 "<b>Down!</b>";`_ in _nginx/apibreaker.conf_.
+
+    2. Restart nginx: _`docker exec -d webhook_apibreaker_1 /etc/init.d/nginx reload`_.
+
+2. Observe that requests to **_apibreaker_1_** have a status code of **_500_**
+
+3. Restart the gateway by restarting GraphQL instances. Observe that it restarts without issue.
+
+## Approach #2: Build Status Webhook
+
+Register a [Build Status webhook][webhook] in Apollo Studio that stores the
+supergraph SDL each time the graph changes. If the gateway can't connect to
+studio, use the stored SDL instead.
+
+### Setup:
+
+1. Start Docker Services
+
+```sh
+npm run webhook
+```
+
+2. Modify **_.env_** envrionment settings to use the caching method approach #2
+
+```sh
+# # use this value when you ARE NOT using any the optional caching methods
+# APOLLO_SCHEMA_CONFIG_DELIVERY_ENDPOINT=https://uplink.api.apollographql.com/
+
+
+# # use this value ONLY when you ARE using the optional caching method approach #1 (Approach #1: Nginx Caching Proxy)
+# APOLLO_SCHEMA_CONFIG_DELIVERY_ENDPOINT=http://localhost:8080/
+
+
+# # use these values ONLY when you ARE using the optional caching method approach #2  (Approach #2: Build Status Webhook)
+APOLLO_SCHEMA_CONFIG_DELIVERY_ENDPOINT=http://localhost:8090/
+SDL_BACKUP_ENDPOINT=http://localhost:5000/backup-sdl
+```
+
+3. Restart GraphQL instances
+
+4. Make the cache-service webhook endpoint available to studio:
+
+    1. Install ngrok: _`brew install ngrok`_
+
+    2. Run the ngrok proxy: _`ngrok http 5000`_
+
+    3. Copy the http forwarding url (something like: http://a1b2c3d4e5f6.ngrok.io)
+
+    4. [Register your webhook in Apollo Studio][register].
+
+### Testing:
+
+1. Trigger a schema change with [_`npm run publish`_][publish]. Observe that a file is written
+   inside **_cache-service/tmp/._**
+
+2. Bring down the api:
+
+    1. Uncomment _`return 500 "<b>Down!</b>";`_ in _nginx/apibreaker.conf_.
+
+    2. Restart nginx: _`docker exec -d webhook_apibreaker_1 /etc/init.d/nginx reload`_.
+
+3. Observe that requests to **_apibreaker_1_** have a status code of **_500_**
+
+4. Restart the gateway by restarting GraphQL instances. Observe that it restarts without issue.
+
+5. Make another schema change. Observe that the gateway updates after the webhook is triggered.
+
+[register]: https://www.apollographql.com/docs/studio/schema-change-integration/#webhook-format
+[publish]: https://www.apollographql.com/docs/rover/subgraphs/#publishing-a-subgraph-schema-to-apollo-studio
+[webhook]: https://www.apollographql.com/docs/studio/build-status-notification/
 
 ---
 
 Setting up managed federation: https://www.apollographql.com/docs/federation/managed-federation/setup/
 
-NGINX Proxy Caching: https://github.com/apollosolutions/managed-federation-resiliency/tree/main/nginx
+Managed Federation Resiliency: https://github.com/apollosolutions/managed-federation-resiliency
