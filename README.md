@@ -55,14 +55,15 @@ npm run restore
 ```
 
 5. Testing the playground and voyager mapping:
-    1. Orders:
+    1. Gateway:
+        1. Playground: http://localhost:4000/graphql
+        2. Voyager: http://localhost:4000/
+    2. Orders:
         1. Playground: http://localhost:4001/graphql
         2. Voyager: http://localhost:4001/
-    2. Products:
+    3. Products:
         1. Playground: http://localhost:4002/graphql
         2. Voyager: http://localhost:4002/
-    3. Gateway:
-        1. Playground: http://localhost:4000/
 
 ---
 
